@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 
-video = cv2.VideoCapture(0) # 카메라 생성, 0번 카메라로 live feed 받기
+video = cv2.VideoCapture(1) # 카메라 생성, 0번 카메라로 live feed 받기
 # 비디오 캡쳐 객체가 정상적으로 open 되었는지 확인
 if video.isOpened():
     print('width: {}, height : {}'.format(video.get(3), video.get(4)))
@@ -13,6 +13,7 @@ cv2.namedWindow('Canny Edge', 0)
 # 트랙바를 조절할 때마다 실행할 명령이 따로 없으므로 dummy 함수를 하나 만들어준다.
 def nothing(x):
     pass
+
 # Canny Edge window에 0~255 임계값 조절 trackbar 두 개
 cv2.createTrackbar('threshold 1', 'Canny Edge', 0, 500, nothing) # 트랙바 생성, 조정 범위는 0~500
 cv2.createTrackbar('threshold 2', 'Canny Edge', 0, 500, nothing)
@@ -55,26 +56,52 @@ while True:
     
     elif cv2.waitKey(1) == ord('q'):
         #화면캡쳐
-        cv2.imwrite("capture" + ".png", frame_canny)  # 파일이름(한글안됨), 이미지 
+        #반전 이미지 (흑 백)
+        reversed_image = cv2.bitwise_not(frame_canny)
+        cv2.imwrite("capture" + ".png", reversed_image)  # 파일이름(한글안됨), 이미지 
+        
+        #cv2.imwrite("capture" + ".png", frame_canny)  # 파일이름(한글안됨), 이미지 
         
     elif cv2.waitKey(1) == ord('w'):
+       
+        #별 이미지 생성      
+        # Star_3 = cv2.imread('Star.png',0)
+        # cv2.imwrite("Star2" + ".png", Star_3)
+        # img2 = Image.open('Star2.png') 
+        
+        #왜 3차원 배열이야???
+        # --> RGB 때문에.
+        
+        #영상처리 이미지                
         img2 = Image.open('capture.png') 
+        
         img2.show()
         x = np.asarray(img2)
-        print(x)
-        print(x.shape)
+        #print(x)
+        #print(x.shape)
         
         img_2 = Image.fromarray(x)
-        #img_2.show()
+        img_2.show()
         f = open('coordin.txt', 'w')
-        for i in range(1,480):
-            for j in range(1,640):
+        
+        # 윤곽선 X Y 좌표 검출
+        for i in range(0,481):
+            for j in range(0,641):
                 if x[i][j]==255:
                     num_i = str(i)
                     num_j = str(j)
                     sentance = 'x,y :' + num_i +" " + num_j + "\n"
                     f.write(sentance)
                     print('x,y :', i , j)
+        
+        # for i in range(0,100):
+        #     for j in range(0,100):
+        #         if x[i][j]==255:
+        #             num_i = str(i)
+        #             num_j = str(j)
+        #             sentance = 'x,y :' + num_i +" " + num_j + "\n"
+        #             f.write(sentance)
+        #             print('x,y :', i , j)        
         
         f.close()
         
