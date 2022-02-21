@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 
-video = cv2.VideoCapture(1) # 카메라 생성, 0번 카메라로 live feed 받기
+video = cv2.VideoCapture(0) # 카메라 생성, 0번 카메라로 live feed 받기
 # 비디오 캡쳐 객체가 정상적으로 open 되었는지 확인
 if video.isOpened():
     print('width: {}, height : {}'.format(video.get(3), video.get(4)))
@@ -71,6 +71,8 @@ while True:
         
         #왜 3차원 배열이야???
         # --> RGB 때문에.
+        
+        #영상을 전처리과정을 거친후 
         
         #영상처리 이미지                
         img2 = Image.open('capture.png') 
