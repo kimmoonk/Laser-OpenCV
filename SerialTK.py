@@ -9,7 +9,7 @@ class SerialThread(threading.Thread):
     '''
     Control RS-xxx Ports
     '''
-    seq = serial.Serial('COM3', 9600, timeout=1)  # MS-Windows
+    seq = serial.Serial('COM6', 9600, timeout=1)  # MS-Windows
     # seq = serial.Serial('/dev/ttyUSB0', 9600) # Linux
     is_run = True
 

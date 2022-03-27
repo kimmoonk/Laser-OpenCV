@@ -158,13 +158,51 @@ def findnext(bm: np.array) -> Optional[Tuple[Union[int,float], int]]:
     x = w[1][q]
     return y[0], x[0]
 
+def xor_to_ref(bm: np.array, x: int, y: int, xa: int) -> None:
+    """
+     /* efficiently invert bits [x,infty) and [xa,infty) in line y. Here xa
+    must be a multiple of BM_WORDBITS. */
+    """
+
+    if x < xa:
+        bm[y, x:xa] ^= True
+    elif x != xa:
+        bm[y, xa:x] ^= True
+
+def xor_path(bm: np.array, p: _Path) -> None:
+    """
+    a path is represented as an array of points, which are thought to
+    lie on the corners of pixels (not on their centers). The path point
+    (x,y) is the lower left corner of the pixel (x,y). Paths are
+    represented by the len/pt components of a path_t object (which
+    also stores other information about the path) */
+
+    xor the given pixmap with the interior of the given path. Note: the
+    path must be within the dimensions of the pixmap.
+    """
+    if len(p) <= 0:  # /* a path of length 0 is silly, but legal */
+        return
+
+    y1 = p.pt[-1].y
+    xa = p.pt[0].x
+    for n in p.pt:
+        x, y = n.x, n.y
+        if y != y1:
+            # /* efficiently invert the rectangle [x,xa] x [y,y1] */
+            xor_to_ref(bm, x, min(y, y1), xa)
+            y1 = y
+
+
 # Initialize data, for example convert a PIL image to a numpy array
 # [...]
 data = np.zeros((32, 32), np.uint32)
-data[8:32, 8:32-8] = 1
+data[8:32-8, 8:32-8] = 1
 image = np.asarray(data)
 
 original = image.copy()
+
+bitmap2 = Bitmap(data)
+path2 = bitmap2.trace()
 
 
 w = np.nonzero(image)
@@ -191,7 +229,7 @@ print(w[0][q])
 print(w[1][q])
 print(y)
 
-pt = [ ]  
+plist = [ ]  
 
 test = findnext(image)
 
@@ -201,6 +239,32 @@ sign = original[y0][x0] # 1 Or 0
 
 path = findpath(image, x0, y0 + 1 , sign, POTRACE_TURNPOLICY_MINORITY)
 
+# path 지우기 
+# xor_path(image,path)
+
+#if path.area > 2:
+#    plist.append(path)
+
+
+abrcde = 112
+
+print(plist)
+
+for curve in path2:
+    print ( "start_point ", curve.start_point)
+    for segment in curve:
+        print (segment)
+        end_point_x = segment.end_point
+        end_point_y = segment.end_point
+        if segment.is_corner:
+            c_x = segment.c
+            c_y = segment.c
+        else:
+            c1_x, c1_y = segment.c1
+            c2_x, c2_y = segment.c2
+
+
+
 plt.figure()
-plt.plot(111), plt.imshow(image, cmap = "gray"), plt.title("With [rows,cols]")
+plt.plot(111), plt.imshow(data, cmap = "gray"), plt.title("With [rows,cols]")
 plt.show()

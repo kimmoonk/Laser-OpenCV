@@ -27,7 +27,7 @@ print(nonzer)
 #print (return1)
 
 bitmap = Bitmap(x)
-path = bitmap.trace(alphamax=0.5)
+path = bitmap.trace(alphamax=1)
 
 print(path)
 # print(path.decomposition_points)
@@ -42,11 +42,13 @@ for curve in path:
     Str_Start_Point = str(curve.start_point)
     memo.write("start_point =" + Str_Start_Point + "\n")
     for segment in curve:
-        #print (segment)
+        
+        if segment.is_corner == True:
+            print ("중간점 = ",segment.c)
         end_point_x = segment.end_point
         end_point_y = segment.end_point
         
-        print (end_point_x)
+        print ("종착점 = ", end_point_x)
         
         #꼭지점 테스트중
         arr = np.append(arr,end_point_x)
