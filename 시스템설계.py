@@ -1,21 +1,14 @@
-from turtle import distance, done, xcor
+from turtle import xcor
 import cv2
 import numpy as np
 from numpy import array as a
 
 import potrace
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-
 from PIL import Image
 from Bezier import Bezier
 
-from math import *
 
-from ArcApp import *
-
-PI = 3.1415926535
-quart = PI / 2
 
 # Make a numpy array with a rectangle in the middle
 data = np.zeros((50, 50), np.uint32)
@@ -23,8 +16,9 @@ data[8:32-8, 8:32-8] = 1
 
 #img2 = Image.open('Star2.png') 
 
-img = Image.open('vector.png')
+img = Image.open('wooin.png')
 img2 = img.convert('1')
+
 
 x = np.asarray(img2)
 
@@ -33,7 +27,7 @@ x = np.asarray(img2)
 bmp = potrace.Bitmap(x)
 
 # Trace the bitmap to a path
-path = bmp.trace(alphamax=1.0)
+path = bmp.trace(turdsize = 2, alphamax = 2)
 
 # 시작점 중간점 종착점
 points = np.empty((0,2))
@@ -43,11 +37,8 @@ t_points = np.arange(0, 1, 0.01)
 
 Contour_Num = 0
 count = 0
-set_error = 0.01
 
 memo = open('code.txt', 'w')
-
-plt.axes().set_aspect('equal', 'box')
 
 
 for curve in path:
@@ -60,18 +51,18 @@ for curve in path:
     #        "X"    ,  round(curve.start_point.x,1) + " "
     #        "Y"    ,  round(curve.start_point.y,1) )
     
-    print ("S1000") # Laser ON
+    print ("S    1000") # Laser ON
 
     
     # 전송할 Memo 파일 작성
-    sentence = ("L" + 
-                "X" + str(round(curve.start_point.x, 1)) +
+    sentence = ("L   " + 
+                "X" + str(round(curve.start_point.x, 1)) + " "
                 "Y" + str(round(curve.start_point.y, 1)) + "\n")
     
     print (sentence)
     
     memo.write(sentence)    
-    memo.write("S1000\n")
+    memo.write("S   1000\n")
     
     
     
@@ -100,11 +91,11 @@ for curve in path:
             # 전송할 Memo 파일 작성    
 
             sentence = (
-                        "L" + 
-                        "X" + str(round(c_x.x, 1)) + 
+                        "L   " + 
+                        "X" + str(round(c_x.x, 1)) + " "
                         "Y" + str(round(c_y.y, 1)) + "\n"
-                        "L" + 
-                        "X" + str(round(end_point.x, 1)) +
+                        "L   " + 
+                        "X" + str(round(end_point.x, 1)) + " "
                         "Y" + str(round(end_point.y, 1)) + "\n"
                         )            
             
@@ -112,6 +103,8 @@ for curve in path:
             
             memo.write(sentence)    
 
+
+            
             # points = np.append(
             #         points,np.array([[c_x.x, 
             #                           c_x.y]]) , 
@@ -127,21 +120,17 @@ for curve in path:
                         
             
 
-        # 만약 Segment가 Bezier곡선일 경우
+        # 만약 Segment가 곡선일 경우
         else:
             c1 = segment.c1
             c2 = segment.c2
             
             # 목표지점 제어점1 제어점2
             
-            # 전송할 Memo 파일 작성          
-            #//////////////////////////////////////////////////////////////////////////////////////////////
-            #시스템설계 파트      
-            
-            sentence =  (
-                        "X" + str(round(points[-1][0], 1)) + " "
-                        "Y" + str(round(points[-1][1], 1)) + " "
-                
+            # 전송할 Memo 파일 작성                
+
+            sentence = (
+                        "C   " + 
                         "X" + str(round(end_point.x, 1)) + " "
                         "Y" + str(round(end_point.y, 1)) + " "
                         #C1 (제어점)
@@ -150,20 +139,27 @@ for curve in path:
                         #C2 (제어점)
                         "X" + str(round(c2.x, 1)) + " "
                         "Y" + str(round(c2.y, 1)) + "\n"                                                                        
-                        )
+                       )
+
+            print(sentence)            
+    
             
-            #//////////////////////////////////////////////////////////////////////////////////////////////
+            memo.write(sentence)    
+
+
             #베지에곡선을 위해서는 이전 endpoint, c1,c2, 이번 endpoint 필요
-            
             
             points_set_1 = a([
                 points[-1],[c1.x,c1.y],[c2.x,c2.y],[end_point.x,end_point.y]
                 ])
             
+            curve_set_1 = Bezier.Curve(t_points, points_set_1)
             
-            BezierCurveTo_circular(set_error,points_set_1,200)
             
-            curve_set_1 = Bezier.Curve(t_points, points_set_1)                
+            plt.plot(curve_set_1[:, 0], curve_set_1[:, 1])
+            #plt.plot(points_set_1[:, 0], points_set_1[:, 1], 'ro:')
+
+        
             
         
         # print ("EndPoint ", end_point)        
@@ -173,9 +169,7 @@ for curve in path:
         axis = 0)
         
     print ("S    0")
-    memo.write("S0\n")  
-    memo.write("Z\n")      
-        
+    memo.write("S   0\n")      
 
     #print (points)
           
@@ -183,13 +177,6 @@ for curve in path:
 memo.close()
             
 plt.grid()
-
-plt.xlabel('X-Axis')
-plt.ylabel('Y-Axis')
-title = 'Set_Error : ' + str(set_error)
-plt.title(title)   
-
-
 
 print(count)
 
