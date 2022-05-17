@@ -130,8 +130,8 @@ def dist (p1 = [], p2 = []):
 
 def BezierCurveTo_circular(tolerance,
                            points_set,
-                           m_safety):
-
+                           m_safety,
+                           memo):
 
     ts = 0
     te = 1
@@ -198,26 +198,25 @@ def BezierCurveTo_circular(tolerance,
                 np3 = Curve_End[0]
                 arc = getCircleCenter(np1 , np2 , np3)
                 
-                ''' PathCode 저장 '''
-                # Sentance
-                sentence =  (
-                            "C   " + 
-                            # Arc 중점좌표
-                            "X" + str(round(arc[0], 1)) + " "
-                            "Y" + str(round(arc[1], 1)) + " "
-                            # Arc 반지름좌표
-                            "R" + str(round(arc[4], 1)) + " "
-                            # Arc 시작각도, 끝각도
-                            "I" + str(round(arc[2]/PI * 180, 1)) + " "
-                            "J" + str(round(arc[3]/PI * 180, 1)) + "\n"                                                                        
-                            )            
-                
-                print(sentence)                     
-                # memo.write(sentence)
-                
-
-                
-                ''' 그림 그리기 '''
+            ''' PathCode 저장 '''
+            # Sentance
+            sentence =  (
+                        "C   " + 
+                        # Arc 중점좌표
+                        "X" + str(round(arc[0], 1)) + " "
+                        "Y" + str(round(arc[1], 1)) + " "
+                        # Arc 반지름좌표
+                        "R" + str(round(arc[4], 1)) + " "
+                        # Arc 시작각도, 끝각도
+                        "I" + str(round(arc[2]/PI * 180, 1)) + " "
+                        "J" + str(round(arc[3]/PI * 180, 1)) + "\n"                                                                        
+                        )            
+            
+            print(sentence)
+            memo.write(sentence)    
+    
+                                                 
+            ''' 그림 그리기 '''
             pac = mpatches.Arc((arc[0],arc[1]), arc[4]*2, arc[4]*2, angle=0, theta1=arc[2]/PI * 180, theta2=arc[3]/PI * 180,linewidth=2,color=np.random.rand(3,))
             plt.gcf().gca().add_artist(pac)
             #circle = plt.Circle((arc[0],arc[1]),arc[4],fill=False,color=np.random.rand(3,)) # 원

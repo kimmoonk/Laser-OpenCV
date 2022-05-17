@@ -38,7 +38,7 @@ def showMultiImage(dst, src, h, w, d, col, row):
         dst[(col*h):(col*h)+h, (row*w):(row*w)+w, 2] = src[0:h, 0:w]
 while True:
     check, frame = video.read() # 카메라에서 이미지 얻기. 비디오의 한 프레임씩 읽기, 제대로 프레임을 읽으면 ret값이 True 실패하면 False, frame에는 읽은 프레임이 나옴
-    hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     gau_frame = cv2.GaussianBlur(frame, (5, 5), 0) # 노이즈 제거 - 얻어온 프레임에 대해 5x5 가우시안 필터 먼저 적용
     low = cv2.getTrackbarPos('threshold 1', 'Canny Edge') # 사용자 설정 신뢰도 임계값 1
     high = cv2.getTrackbarPos('threshold 2', 'Canny Edge') # 사용자 설정 신뢰도 임계값 2
@@ -47,9 +47,14 @@ while True:
     depth = gau_frame.shape[2] # 이미지 색상 크기
     frame_canny = cv2.Canny(gau_frame, low, high) # 트랙바로부터 읽어온 threshold 1,2 값들을 사용하여 Canny 함수 실행
     # 화면에 표시할 이미지 만들기 (1 x 2)
+    
+    reversed_image = cv2.bitwise_not(frame_canny)
+    
     result = create_image_multiple(height, width, depth, 1, 2) # 화면 표시할 1x2 검정 이미지 생성
+    
     showMultiImage(result, gau_frame, height, width, depth, 0, 0) # 왼쪽 (0, 0)
-    showMultiImage(result, frame_canny, height, width, 1, 0, 1) # 오른쪽 (0, 1)
+    #showMultiImage(result, frame_canny, height, width, 1, 0, 1) # 오른쪽 (0, 1)
+    showMultiImage(result, reversed_image, height, width, 1, 0, 1) # 오른쪽 (0, 1)
     cv2.imshow('Canny Edge', result)              
     if cv2.waitKey(1) == 32: #SpaceBar -> 종료
         break
