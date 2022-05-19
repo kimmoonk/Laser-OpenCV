@@ -23,7 +23,7 @@ data[8:32-8, 8:32-8] = 1
 
 #img2 = Image.open('Star2.png') 
 
-img = Image.open('vector.png')
+img = Image.open('logo.png')
 img2 = img.convert('1')
 
 MakePathCode(img2,0.0)

@@ -17,13 +17,15 @@ from ArcApp import *
 def MakePathCode(image,alpha=0.0):
     x = np.asarray(image)
     bitmap = potrace.Bitmap(x)
-    path = bitmap.trace(alphamax = alpha)
+    path = bitmap.trace(turdsize = 3, alphamax = alpha)
     points = np.empty((0,2)) 
     
-    fig_PathCode = Figure(figsize=(5, 4), dpi=100)
+    fig_PathCode = Figure(figsize=(5, 5), dpi=100)
     ax = fig_PathCode.add_subplot()
     ax.set_xlabel("X-Axis")
     ax.set_ylabel("Y-Axis")
+    ax.set(xlim=(0, 100), 
+        ylim=(0, 100) )
 
 
     t_points = np.arange(0, 1, 0.01)
@@ -159,10 +161,13 @@ def MakePathCode(image,alpha=0.0):
             points,np.array([[end_point.x, 
                             end_point.y]]) , 
             axis = 0)
+        
+        # 한 Contour 끝
+        memo.write("S0\n")
+
             
 
     print ("S    0")
-    memo.write("S0\n")  
     memo.write("Z\n")
     memo.close()
     plt.grid()
@@ -171,7 +176,7 @@ def MakePathCode(image,alpha=0.0):
     title = 'Set_Error : ' + str(set_error)
     plt.title(title)   
     print(count)
-    
+
     plt.show
 
     return fig_PathCode        

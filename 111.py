@@ -62,8 +62,18 @@ while True:
     elif cv2.waitKey(1) == ord('q'):
         #화면캡쳐
         #반전 이미지 (흑 백)
+        
+        img22 = cv2.imread("11112.png",cv2.IMREAD_GRAYSCALE)
+        img12 = cv2.Canny(img22, low, high)
+        img33 = cv2.bitwise_not(img12)
+        kernel = np.ones((1,1),np.uint8)
+        img44 = cv2.morphologyEx(img33,cv2.MORPH_CLOSE,kernel)
+        
+        
+        cv2.imwrite("capture" + ".png",img44 )  # 파일이름(한글안됨), 이미지 
+
         reversed_image = cv2.bitwise_not(frame_canny)
-        cv2.imwrite("capture" + ".png", reversed_image)  # 파일이름(한글안됨), 이미지 
+        #cv2.imwrite("capture" + ".png", img12)  # 파일이름(한글안됨), 이미지 
         
         #cv2.imwrite("capture" + ".png", frame_canny)  # 파일이름(한글안됨), 이미지 
         

@@ -22,6 +22,11 @@ import matplotlib.pyplot as plt
 import multiprocessing
 from PIL import Image, ImageTk
         
+import customtkinter
+
+customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
+customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
+
 
 f = open("code.txt", 'r')
 video = cv2.VideoCapture(0) # 카메라 생성, 0번 카메라로 live feed 받기
@@ -42,46 +47,169 @@ class InformWindow:
     def processButtonOK(self):
         self.window.destroy()
     
-class mainGUI:
+class App(customtkinter.CTk):
+    WIDTH = 780
+    HEIGHT = 520
+    
     def __init__(self):
-        window = tk.Tk()
-        window.title("GUI UART Tx/Rx Demo")
+        super().__init__() 
+               
+        # window = tk.Tk()
+        self.title("GUI UART Tx/Rx Demo")
+        self.geometry(f"{App.WIDTH}x{App.HEIGHT}")
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)  # call .on_closing() when app gets closed
+
         self.uartState = False # is uart open or not
 
+
+        # ============ create two frames ============
+        
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+
+        self.frame_left = customtkinter.CTkFrame(master=self,
+                                                 width=140,
+                                                 corner_radius=0)
+        self.frame_left.grid(row=0, column=0, sticky="nswe")
+
+        self.frame_right = customtkinter.CTkFrame(master=self)
+        self.frame_right.grid(row=0, column=1, sticky="nswe", padx=20, pady=20)
+
+        # ============ frame_left ============
+        # configure grid layout (1x13)
+        self.frame_left.grid_rowconfigure(0, minsize=10)   # empty row with minsize as spacing
+        self.frame_left.grid_rowconfigure(5, weight=1)  # empty row as spacing
+        #self.frame_left.grid_rowconfigure(8, minsize=20)    # empty row with minsize as spacing
+        #self.frame_left.grid_rowconfigure(11, minsize=10)  # empty row with minsize as spacing
+        self.frame_left.grid_rowconfigure(11, minsize=20)  # empty row with minsize as spacing
+        self.frame_left.grid_rowconfigure(12, minsize=20)  # empty row with minsize as spacing        
+        self.frame_left.grid_rowconfigure(13, minsize=20)  # empty row with minsize as spacing
+
+
+        # ========frame _left (0~2,0)
         # a frame contains COM's information, and start/stop button
-        frame_COMinf = tk.Frame(window)
-        frame_COMinf.grid(row = 1, column = 1)
+        self.frame_COMinf = customtkinter.CTkFrame(master=self.frame_left,
+                                              corner_radius=0)
+        self.frame_COMinf.grid(row=0, column=0, rowspan=3, sticky="nswe")
+        
+        # self.frame_COMinf.grid_rowconfigure(0, minsize=10)   # empty row with minsize as spacing
+        # self.frame_COMinf.grid_rowconfigure(5, weight=1)  # empty row as spacing
+        # self.frame_COMinf.grid_rowconfigure(8, minsize=20)    # empty row with minsize as spacing
+        # self.frame_COMinf.grid_rowconfigure(11, minsize=10)  # empty row with minsize as spacing
 
-        labelCOM = tk.Label(frame_COMinf,text="COMx: ")
+        self.labelCOM = customtkinter.CTkLabel(master=self.frame_COMinf,
+                                               width=60,
+                                              text="COM Port: ",
+                                               text_font=("Roboto Medium", -12))  # font name and size in px
+
         self.COM = tk.StringVar(value = "COM3")
-        ertryCOM = tk.Entry(frame_COMinf, textvariable = self.COM)
-        labelCOM.grid(row = 1, column = 1, padx = 5, pady = 3)
-        ertryCOM.grid(row = 1, column = 2, padx = 5, pady = 3)
+        
+        self.ertryCOM = customtkinter.CTkEntry(master=self.frame_COMinf, 
+                                               width=60,
+                                               textvariable = self.COM)
+        
+        self.labelCOM.grid(row = 1, column = 1, padx = 5, pady = 3)
+        self.ertryCOM.grid(row = 1, column = 2, padx = 5, pady = 3)
 
-        labelBaudrate = tk.Label(frame_COMinf,text="Baudrate: ")
+        labelBaudrate = customtkinter.CTkLabel(master=self.frame_COMinf,
+                                               width=60,
+                                               text="Baudrate: ",
+                                               text_font=("Roboto Medium", -12))  # font name and size in px
+
         self.Baudrate = tk.IntVar(value = 9600)
-        ertryBaudrate = tk.Entry(frame_COMinf, textvariable = self.Baudrate)
-        labelBaudrate.grid(row = 1, column = 3, padx = 5, pady = 3)
-        ertryBaudrate.grid(row = 1, column = 4, padx = 5, pady = 3)
+        ertryBaudrate = customtkinter.CTkEntry(master=self.frame_COMinf, 
+                                               width=60,
+                                               textvariable = self.Baudrate)
+        labelBaudrate.grid(row = 2, column = 1, padx = 5, pady = 3)
+        ertryBaudrate.grid(row = 2, column = 2, padx = 5, pady = 3)
 
-        labelParity = tk.Label(frame_COMinf,text="Parity: ")
+        labelParity = tk.Label(self.frame_COMinf,text="Parity: ")
         self.Parity = tk.StringVar(value ="NONE")
-        comboParity = ttk.Combobox(frame_COMinf, width = 17, textvariable=self.Parity)
+        comboParity = ttk.Combobox(self.frame_COMinf, width = 17, textvariable=self.Parity)
         comboParity["values"] = ("NONE","ODD","EVEN","MARK","SPACE")
         comboParity["state"] = "readonly"
-        labelParity.grid(row = 2, column = 1, padx = 5, pady = 3)
-        comboParity.grid(row = 2, column = 2, padx = 5, pady = 3)
+        # labelParity.grid(row = 2, column = 1, padx = 5, pady = 3)
+        # comboParity.grid(row = 2, column = 2, padx = 5, pady = 3)
 
-        labelStopbits = tk.Label(frame_COMinf,text="Stopbits: ")
+        labelStopbits = tk.Label(self.frame_COMinf,text="Stopbits: ")
         self.Stopbits = tk.StringVar(value ="1")
-        comboStopbits = ttk.Combobox(frame_COMinf, width = 17, textvariable=self.Stopbits)
+        comboStopbits = ttk.Combobox(self.frame_COMinf, width = 17, textvariable=self.Stopbits)
         comboStopbits["values"] = ("1","1.5","2")
         comboStopbits["state"] = "readonly"
-        labelStopbits.grid(row = 2, column = 3, padx = 5, pady = 3)
-        comboStopbits.grid(row = 2, column = 4, padx = 5, pady = 3)
+        # labelStopbits.grid(row = 2, column = 3, padx = 5, pady = 3)
+        # comboStopbits.grid(row = 2, column = 4, padx = 5, pady = 3)
         
-        self.buttonSS = tk.Button(frame_COMinf, text = "Start", command = self.processButtonSS)
-        self.buttonSS.grid(row = 3, column = 4, padx = 5, pady = 3, sticky = tk.E)
+        self.buttonSS = customtkinter.CTkButton(master=self.frame_COMinf, 
+                                                text = "Connect", 
+                                                fg_color=("gray75", "gray30"),  # <- custom tuple-color
+                                                command = self.processButtonSS)
+        self.buttonSS.grid(row = 3, column = 1, columnspan=2, padx = 5, pady = 3, sticky = "S")
+
+        # ============= frame left_(3~10,0) (Pathcode 표기) ============= 
+        self.frame_CodeEntry = customtkinter.CTkFrame(master=self.frame_left,
+                                                        corner_radius=0)
+        self.frame_CodeEntry.grid(row=3, column=0, rowspan=8, sticky="nswe")
+        
+        # self.frame_CodeEntry.grid_rowconfigure(0, minsize=10)   # empty row with minsize as spacing
+        self.frame_CodeEntry.grid_rowconfigure(0, weight=1)  # empty row as spacing
+        # self.frame_CodeEntry.grid_rowconfigure(8, minsize=20)    # empty row with minsize as spacing
+        # self.frame_CodeEntry.grid_rowconfigure(11, minsize=10)  # empty row with minsize as spacing
+        
+        self.label_PathCode = customtkinter.CTkLabel(master=self.frame_CodeEntry,
+                                                   text="Path Code 들어갈 자리" ,
+                                                   width = 130,
+                                                   fg_color=("white", "gray38"),  # <- custom tuple-color
+                                                   justify=tk.LEFT,
+                                                   corner_radius=0)
+        
+        self.label_PathCode.grid(column=0, row=0, rowspan=8, sticky="nswe", padx=15, pady=15)  
+        
+        # ============= frame left_(11~12,0) (Buttons) ============= 
+        self.frameFunction = customtkinter.CTkFrame(master=self.frame_left,
+                                                corner_radius=0)
+        self.frameFunction.grid(row = 11, column = 0, rowspan = 2, sticky="nswe")
+                
+        self.buttonStartPoint = customtkinter.CTkButton(master=self.frameFunction,
+                                                        width = 30,
+                                                        height = 15,
+                                                        text = "원점 검색",
+                                                        text_font=("Roboto Medium", -12),  # font name and size in px
+                                                        fg_color=("gray75", "gray30"),  # <- custom tuple-color
+                                                        command = self.processButtonStartPoint)
+        self.buttonStartPoint.grid(row = 0, column = 0, padx = 5, pady = 3)
+        
+        self.buttonMoveZeroPos = customtkinter.CTkButton(master=self.frameFunction,
+                                                        width = 30,
+                                                        height = 15,
+                                                        text = "영점 이동",
+                                                        text_font=("Roboto Medium", -12),  # font name and size in px
+                                                        fg_color=("gray75", "gray30"),  # <- custom tuple-color
+                                                        command = self.processButtonMoveZeroPos)
+        self.buttonMoveZeroPos.grid(row = 0, column = 1, padx = 5, pady = 3)
+        
+        self.buttonMakePathCode = customtkinter.CTkButton(master=self.frameFunction,
+                                                        width = 30,
+                                                        height = 15,
+                                                        text = "코드 변환",
+                                                        text_font=("Roboto Medium", -12),  # font name and size in px
+                                                        fg_color=("gray75", "gray30"),  # <- custom tuple-color
+                                                        command = self.processButtonMakePathCode)
+        self.buttonMakePathCode.grid(row = 1, column = 0, padx = 5, pady = 3)        
+                
+                
+        self.buttonSendPathCode = customtkinter.CTkButton(master=self.frameFunction,
+                                                        width = 30,
+                                                        height = 15,
+                                                        text = "코드 전송",
+                                                        text_font=("Roboto Medium", -12),  # font name and size in px
+                                                        fg_color=("gray75", "gray30"),  # <- custom tuple-color
+                                                        command = self.processButtonSendPathCode)
+        self.buttonSendPathCode.grid(row = 1, column = 1, padx = 5, pady = 3)  
+
+        # ============ frame_right PathCode 및 영상보여주기 ============
+        
+        
+        # configure grid layout (3x7)
 
         # serial object
         self.ser = serial.Serial()
@@ -103,49 +231,46 @@ class mainGUI:
         # self.OutputText.pack()
 
         '''Tx 부분 입니다'''
-        frameTrans = tk.Frame(window)
-        frameTrans.grid(row = 3, column = 1)
+        frameTrans = tk.Frame(self)
+        # frameTrans.grid(row = 2, column = 1)
         labelInText = tk.Label(frameTrans,text="To Transmit Data:")
-        labelInText.grid(row = 1, column = 1, padx = 3, pady = 2, sticky = tk.W)
+        # labelInText.grid(row = 1, column = 1, padx = 3, pady = 2, sticky = tk.W)
+        
         frameTransSon = tk.Frame(frameTrans)
-        frameTransSon.grid(row = 2, column =1)
+        #frameTransSon.grid(row = 1, column =1, sticky = tk.W)
+        
         scrollbarTrans = tk.Scrollbar(frameTransSon)
-        scrollbarTrans.pack(side = tk.RIGHT, fill = tk.Y)
-        self.InputText = tk.Text(frameTransSon, wrap = tk.WORD, width = 60, height = 5, yscrollcommand = scrollbarTrans.set)
-        self.InputText.pack()
+        #scrollbarTrans.pack(side = tk.RIGHT, fill = tk.Y)
+        
+        self.InputText = tk.Text(frameTransSon, wrap = tk.WORD,height = 50,width = 20, yscrollcommand = scrollbarTrans.set)
+        #self.InputText.pack()
+        
         self.buttonSend = tk.Button(frameTrans, text = "Send", command = self.processButtonSend)
-        self.buttonSend.grid(row = 3, column = 1, padx = 5, pady = 3, sticky = tk.E)
+        #self.buttonSend.grid(row = 3, column = 1, padx = 5, pady = 3, sticky = tk.E)
         
-        ''' Butoon 구현부 입니다'''
-        frameFunction = tk.Frame(window)
-        frameFunction.grid(row = 4, column = 1)
-                
-        self.buttonStartPoint = tk.Button(frameFunction, text = "원점 검색", command = self.processButtonStartPoint)
-        self.buttonStartPoint.grid(row = 1, column = 1, padx = 5, pady = 3, sticky = tk.E)
-                
-        self.buttonMoveZeroPos = tk.Button(frameFunction, text = "영점 이동", command = self.processButtonMoveZeroPos)
-        self.buttonMoveZeroPos.grid(row = 1, column = 2, padx = 5, pady = 3, sticky = tk.E)
-
-        self.buttonMakePathCode = tk.Button(frameFunction, text = "Path Code 변환", command = self.processButtonMakePathCode)
-        self.buttonMakePathCode.grid(row = 1, column = 3, padx = 5, pady = 3, sticky = tk.E)        
-        
-        self.buttonSendPathCode = tk.Button(frameFunction, text = "Path Code 보내기", command = self.processButtonSendPathCode)
-        self.buttonSendPathCode.grid(row = 1, column = 4, padx = 5, pady = 3, sticky = tk.E)
         
         ''' 그려질 그림 입니다'''
         
         global frameCanvas 
-        frameCanvas = tk.Frame(window)
-        frameCanvas.grid(row = 2, column = 1)
+        frameCanvas = tk.Frame(self)
+        # frameCanvas.grid(row = 2, column = 2)
 
-        fig = Figure(figsize=(5, 4), dpi=100)
+        fig = Figure(figsize=(7, 7), dpi=100)
+
         ax = fig.add_subplot()
         ax.set_xlabel("X-Axis")
         ax.set_ylabel("Y-Axis")
+        ax.set(xlim=(0, 100), 
+                ylim=(0, 100) )
+
+
+    
+        
+
         
         global canvas
         canvas = FigureCanvasTkAgg(fig, master=frameCanvas)
-        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        # canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
 
         
@@ -155,19 +280,20 @@ class mainGUI:
         global frameEdge
         global lmain
         
-        frameRGB = tk.Frame(window, height = 300, width = 400)
-        frameRGB.grid(row = 2, column = 2)
+        frameRGB = tk.Frame(self, height = 300, width = 400)
+        #frameRGB.grid(row = 2, column = 3)
 
 
         
         # frameEdge = tk.Frame(window, height = 480, width = 640)
         # frameEdge.grid(row = 3, column = 2)
 
-        self.CamThread = threading.Thread(target=self.startcam)
-        self.CamThread.start()
+        #self.CamThread = threading.Thread(target=self.startcam)
+        #self.CamThread.start()
 
-        
-        window.mainloop()
+        customtkinter.set_appearance_mode("light")
+
+        self.mainloop()
 
 
     def processButtonMakePathCode(self):
@@ -232,9 +358,9 @@ class mainGUI:
         else:
             # restart serial port
             self.ser.port = self.COM.get()
-            self.ser.baudrate = self.Baudrate.get()
+            self.ser.baudrate = self.Baudrate.get() #9600
             
-            strParity = self.Parity.get()
+            strParity = self.Parity.get() # NONE
             if (strParity=="NONE"):
                 self.ser.parity = serial.PARITY_NONE
             elif(strParity=="ODD"):
@@ -246,7 +372,7 @@ class mainGUI:
             elif(strParity=="SPACE"):
                 self.ser.parity = serial.PARITY_SPACE
                 
-            strStopbits = self.Stopbits.get()
+            strStopbits = self.Stopbits.get() # 1
             if (strStopbits == "1"):
                 self.ser.stopbits = serial.STOPBITS_ONE
             elif (strStopbits == "1.5"):
@@ -313,13 +439,8 @@ class mainGUI:
 
             lmain.configure(image=imgtk)
             lmain.image = imgtk #Shows frame for display 1
-
-
-
-
             
+    def on_closing(self, event=0):
+        self.destroy()        
 
-            
-                   
-
-mainGUI()
+App()
