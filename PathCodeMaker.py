@@ -51,8 +51,8 @@ def MakePathCode(image,alpha=0.0):
         
         # 전송할 Memo 파일 작성
         sentence = ("L" + 
-                    "X" + str(round(curve.start_point.x, 1)) +
-                    "Y" + str(round(curve.start_point.y, 1)) + "\n")
+                    "X" + str(round(curve.start_point.x, 1)).zfill(4) +
+                    "Y" + str(round(curve.start_point.y, 1)).zfill(4) + "\n")
         
         print (sentence)
         
@@ -127,17 +127,17 @@ def MakePathCode(image,alpha=0.0):
                 #시스템설계 파트      
                 
                 sentence =  (
-                            "X" + str(round(points[-1][0], 1)) + " "
-                            "Y" + str(round(points[-1][1], 1)) + " "
+                            "X" + str(round(points[-1][0], 1)).zfill(4) + " "
+                            "Y" + str(round(points[-1][1], 1)).zfill(4) + " "
                     
-                            "X" + str(round(end_point.x, 1)) + " "
-                            "Y" + str(round(end_point.y, 1)) + " "
+                            "X" + str(round(end_point.x, 1)).zfill(4) + " "
+                            "Y" + str(round(end_point.y, 1)).zfill(4) + " "
                             #C1 (제어점)
-                            "X" + str(round(c1.x, 1)) + " "
-                            "Y" + str(round(c1.y, 1)) + " "
+                            "X" + str(round(c1.x, 1)).zfill(4) + " "
+                            "Y" + str(round(c1.y, 1)).zfill(4) + " "
                             #C2 (제어점)
-                            "X" + str(round(c2.x, 1)) + " "
-                            "Y" + str(round(c2.y, 1)) + "\n"                                                                        
+                            "X" + str(round(c2.x, 1)).zfill(4) + " "
+                            "Y" + str(round(c2.y, 1)).zfill(4) + "\n"                                                                        
                             )
                 
                 #//////////////////////////////////////////////////////////////////////////////////////////////

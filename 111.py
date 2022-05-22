@@ -47,14 +47,24 @@ while True:
     depth = gau_frame.shape[2] # 이미지 색상 크기
     frame_canny = cv2.Canny(gau_frame, low, high) # 트랙바로부터 읽어온 threshold 1,2 값들을 사용하여 Canny 함수 실행
     # 화면에 표시할 이미지 만들기 (1 x 2)
-    
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+
     reversed_image = cv2.bitwise_not(frame_canny)
+    
+    close = cv2.morphologyEx(frame_canny, cv2.MORPH_CLOSE, kernel)
+    
+    delate = cv2.morphologyEx(frame_canny, cv2.MORPH_DILATE, kernel)
+    delate2 = cv2.morphologyEx(delate, cv2.MORPH_DILATE, kernel)
+    
+    erode = cv2.morphologyEx(delate, cv2.MORPH_ERODE, kernel)
+    open = cv2.morphologyEx(erode, cv2.MORPH_OPEN, kernel)
+
     
     result = create_image_multiple(height, width, depth, 1, 2) # 화면 표시할 1x2 검정 이미지 생성
     
-    showMultiImage(result, gau_frame, height, width, depth, 0, 0) # 왼쪽 (0, 0)
+    showMultiImage(result, close, height, width, 1, 0, 0) # 왼쪽 (0, 0)
     #showMultiImage(result, frame_canny, height, width, 1, 0, 1) # 오른쪽 (0, 1)
-    showMultiImage(result, reversed_image, height, width, 1, 0, 1) # 오른쪽 (0, 1)
+    showMultiImage(result, delate2, height, width, 1, 0, 1) # 오른쪽 (0, 1)
     cv2.imshow('Canny Edge', result)              
     if cv2.waitKey(1) == 32: #SpaceBar -> 종료
         break
@@ -70,7 +80,7 @@ while True:
         img44 = cv2.morphologyEx(img33,cv2.MORPH_CLOSE,kernel)
         
         
-        cv2.imwrite("capture" + ".png",img44 )  # 파일이름(한글안됨), 이미지 
+        cv2.imwrite("capture" + ".png",delate2 )  # 파일이름(한글안됨), 이미지 
 
         reversed_image = cv2.bitwise_not(frame_canny)
         #cv2.imwrite("capture" + ".png", img12)  # 파일이름(한글안됨), 이미지 
